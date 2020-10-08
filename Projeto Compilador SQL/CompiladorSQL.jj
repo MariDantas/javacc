@@ -25,15 +25,14 @@ SKIP : {
 }
 
 TOKEN: {
-	  <SELECT: "SELECT"> 
+	  <SELECT: "SELECT">
 	| <FROM: "FROM">
 	| <DISTINCT: "DISTINCT">
 	| <WHERE: "WHERE">
 	| <NOT: "NOT">
 	| <AND: "AND">
 	| <OR: "OR">
-	| <ORDER: "ORDER">
-	| <BY: "BY">
+	| <ORDERBY: "ORDER BY">
 	| <COUNT: "COUNT">
 	| <ASC: "ASC">
 	| <DESC: "DESC">
@@ -84,12 +83,12 @@ void value(): {} {
 }
 
 void tableField(): {} {
-	<COMMA> (<ID> | <ALL>)
+	<COMMA> <ID> (tableField())*
 }
 
 // Beginning of lexical analysis
 void start(): {} {
-	<SELECT> (<ID> | <ALL>) (tableField())* <FROM> <ID> 
+	<SELECT> (<ALL> | <ID> (tableField())? ) <FROM> <ID> 
 	(condition())* <SEMICOLON> (start())* <EOF>
 }
 
@@ -102,6 +101,7 @@ void condition(): {} {
 		| notAndInCond()
 		
 	)
+	| orderByCond()
 }
 
 void simpleCond(): {} {
@@ -132,4 +132,8 @@ void notAndInCond(): {} {
 
 void tuple(): {} {
 	<COMMA> value() (tuple())* 
+}
+
+void orderByCond(): {} {
+	<ORDERBY> tableField() (<ASC> | <DESC>)
 }
